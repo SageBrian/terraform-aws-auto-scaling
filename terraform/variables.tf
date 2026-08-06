@@ -33,3 +33,8 @@ variable "availability_zone_2" {
   type = string
 }
 
+variable "instance_type" {
+
+  type = string
+
+}
