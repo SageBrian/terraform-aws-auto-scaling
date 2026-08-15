@@ -1,134 +1,87 @@
-Absolutely. This is actually a good point to pause the infrastructure work and document what we've built so far.
-
-For a **recruiter-facing portfolio project**, the README should communicate more than "I created an ASG." It should show that you understand **AWS architecture, Terraform, Infrastructure as Code, high availability, security, auto scaling, and operational considerations**.
-
-I would also include a professional architecture diagram.
-
-![Image](https://images.openai.com/static-rsc-4/lLVfZmNKm1abeJj3-wPQDnRQRmQXv8cs7SFs5KafuwaAiP6hzXRiGCjBWv7ppHd3fiq1QUC72-yEmoJO8G28h0PNRw1HjAZPYEQ_GqkOV2Q5akgBvpVHM9Of9SNel1_AU6NMQa9P2uztPKRj73NgB0AdaiCiwx7YNhR19zGmPUHBCDlKwh-LE77Pnwmy_KJP?purpose=fullsize)
-
-![Image](https://images.openai.com/static-rsc-4/dXxAvPtzmU51CB9D3aAELiweINtPOdwEUL4_qYHYOXAjhMyWrErKLsLslQlkJDJhdrs2Fs-j-lMN5vj6EYFrS6ICNx6gZU_rppS90YLPUrZXXwK2sKStdYN-NNMPkb4rgFpwRrbhI_-Ziy5OHAAxVjVebpPRCU2hN74Yq3-yQ3B-JGhwWaCFhvr83wv3fCeh?purpose=fullsize)
-
-![Image](https://images.openai.com/static-rsc-4/SqercZUwfkuC1DrCOg8ofFEkMinU90644r4f9XAwt1yoKqf0o6uJa1WyDQFSaS93myolWMwAB4npsqOrYQveo3LzPIdyRou8ME-KF6g0ub1JnxveBhDXqozzNoFauVwWCKTyQzuUgw0KEi-X68lVKTwGkggDBVaBjgx8J7Hd-k7NoUzYgEfyoMS9BysA264x?purpose=fullsize)
-
-![Image](https://images.openai.com/static-rsc-4/N5VpNke7_8fgUThZiJ3itS2FOPoUw2aw4ueReiHTUiAXJIwqDquzlgzNo0DBFK7VbDTqvj3cJspH6uTYqk79Xwq5YCACGeeEsJ8h5tv3M-DgzwYIPbq9qbrT6oCkeEZtKehLtMZK_3LdzT80ygUD7jt_N-tLCkgZ98feEo8V-nc_7yoLK7sQ5iImcE3N4DWv?purpose=fullsize)
-
-![Image](https://images.openai.com/static-rsc-4/uPHyJn-_5NOT8PmJCSKarciEMG9vG_A7pfelrnTLCWWVA8MqVJJexdMP90qa87yDsksl87NudYTwYktwsKTNCTElyZiZ-mGAPyr0gYspbkdbNpWpIw6NiAyZ7D1Taik5wvI9t3SRrx3g-FDDxvtLOop2-OymGsdtw7v62nZ3qRzTweR0K-M8UsXmltz1xT6L?purpose=fullsize)
-
-## Recommended README
-
-Create/update:
-
-```text
-README.md
-```
-
-with the following:
-
-````markdown
 # AWS EC2 Launch Template & Auto Scaling Infrastructure
-
-![AWS](https://img.shields.io/badge/AWS-Cloud-orange)
-![Terraform](https://img.shields.io/badge/Terraform-Infrastructure%20as%20Code-7B42BC)
-![EC2](https://img.shields.io/badge/AWS-EC2-blue)
-![Auto%20Scaling](https://img.shields.io/badge/AWS-Auto%20Scaling-orange)
-![ALB](https://img.shields.io/badge/AWS-Application%20Load%20Balancer-orange)
 
 ## Overview
 
-This project provisions a highly available and automatically scalable web application infrastructure on AWS using Terraform.
+This project provisions a scalable web application infrastructure on AWS using Terraform.
 
-The infrastructure is designed around an Application Load Balancer, an EC2 Launch Template, and an Auto Scaling Group distributed across multiple Availability Zones.
+The infrastructure uses an Application Load Balancer, EC2 Launch Templates, an Auto Scaling Group, CloudWatch alarms, IAM, security groups, and a multi-AZ VPC.
 
-The entire environment is provisioned and managed through Terraform rather than manually creating resources through the AWS Management Console.
+The infrastructure is managed entirely through Terraform.
 
-The project demonstrates practical cloud engineering concepts including:
-
-- Infrastructure as Code
-- AWS networking
-- EC2 Launch Templates
-- Application Load Balancing
-- Auto Scaling
-- IAM
-- Security Groups
-- CloudWatch monitoring
-- Dynamic AMI discovery
-- Multi-AZ architecture
-- Automated instance configuration
-- Terraform modules
-- Infrastructure validation and deployment
-
----
-
-# Architecture
+## Architecture
 
 ```text
                          Internet
                             |
-                            |
-                    +-------v-------+
-                    |      ALB      |
-                    | Application   |
-                    | Load Balancer |
-                    +-------+-------+
-                            |
-                     HTTP :80
-                            |
-                +-----------+-----------+
-                |                       |
-                v                       v
-        +---------------+       +---------------+
-        |  Public       |       |  Public       |
-        |  Subnet AZ-1  |       |  Subnet AZ-2  |
-        |               |       |               |
-        |   EC2 #1      |       |   EC2 #2      |
-        +-------+-------+       +-------+-------+
-                |                       |
+                            v
+                +-----------------------+
+                | Application Load      |
+                | Balancer              |
                 +-----------+-----------+
                             |
-                     Auto Scaling Group
+                       HTTP :80
                             |
                  +----------+----------+
                  |                     |
-             Scale Out             Scale In
-             CPU > 70%             CPU < 30%
-                 |                     |
                  v                     v
-             CloudWatch            CloudWatch
-               Alarm                 Alarm
-````
-
-The infrastructure is deployed inside an AWS VPC with resources distributed across multiple Availability Zones.
-
----
-
-# Architecture Components
-
-## 1. Amazon VPC
-
-The project creates a dedicated VPC:
-
-```text
-CIDR: 10.0.0.0/16
+        +----------------+    +----------------+
+        | Public Subnet  |    | Public Subnet  |
+        | us-east-1a     |    | us-east-1b     |
+        |                |    |                |
+        | EC2 Instance   |    | EC2 Instance   |
+        +--------+-------+    +--------+-------+
+                 |                     |
+                 +----------+----------+
+                            |
+                  Auto Scaling Group
+                     Min: 2
+                     Desired: 2
+                     Max: 4
+                            |
+                     +------+------+
+                     |             |
+                  Scale Out     Scale In
+                  CPU > 70%     CPU < 30%
+                     |             |
+                     +------+------+
+                            |
+                       CloudWatch
 ```
 
-The VPC provides network isolation for the application infrastructure.
+## AWS Resources
 
-DNS support and DNS hostnames are enabled to support AWS service discovery and EC2 networking.
+The project provisions:
 
----
+* VPC
+* Two public subnets
+* Internet Gateway
+* Public route table
+* Security groups
+* IAM role and instance profile
+* EC2 Launch Template
+* Application Load Balancer
+* ALB Target Group
+* ALB Listener
+* Auto Scaling Group
+* CloudWatch alarms
+* Auto Scaling policies
+* EC2 instances
 
-## 2. Public Subnets
+## Infrastructure
 
-Two public subnets are created across separate Availability Zones.
+### VPC
 
-Example:
+The project creates a dedicated VPC using:
 
 ```text
-10.0.1.0/24
-10.0.2.0/24
+10.0.0.0/16
 ```
 
-Availability Zones are dynamically discovered using a Terraform data source instead of being unnecessarily hardcoded.
+DNS support and DNS hostnames are enabled.
+
+### Availability Zones
+
+Availability Zones are discovered dynamically using Terraform:
 
 ```hcl
 data "aws_availability_zones" "available" {
@@ -136,18 +89,27 @@ data "aws_availability_zones" "available" {
 }
 ```
 
-The subnets use:
+The first two available zones are used for the public subnets:
 
 ```hcl
 data.aws_availability_zones.available.names[0]
 data.aws_availability_zones.available.names[1]
 ```
 
-This makes the configuration more reusable across environments.
+This avoids hardcoding Availability Zone names.
 
----
+### Public Subnets
 
-# 3. Internet Gateway
+Two public subnets are used:
+
+```text
+10.0.1.0/24
+10.0.2.0/24
+```
+
+Each subnet is deployed in a separate Availability Zone.
+
+### Internet Gateway
 
 An Internet Gateway provides internet connectivity for the public subnets.
 
@@ -157,21 +119,9 @@ The public route table contains:
 0.0.0.0/0 -> Internet Gateway
 ```
 
-This allows resources in the public subnets to communicate with the internet.
+## Application Load Balancer
 
----
-
-# 4. Application Load Balancer
-
-An AWS Application Load Balancer distributes incoming HTTP traffic across healthy EC2 instances.
-
-The ALB:
-
-* Runs across multiple Availability Zones
-* Listens on HTTP port 80
-* Uses a Target Group
-* Performs health checks
-* Routes requests only to healthy instances
+The Application Load Balancer receives HTTP traffic on port 80 and forwards requests to the EC2 instances registered with the target group.
 
 Traffic flow:
 
@@ -179,42 +129,38 @@ Traffic flow:
 Client
   |
   v
-ALB :80
+Application Load Balancer
   |
   v
 Target Group
   |
-  +----> EC2
+  +---- EC2 Instance
   |
-  +----> EC2
+  +---- EC2 Instance
 ```
 
----
+The ALB uses health checks to determine which instances are available to receive traffic.
 
-# 5. EC2 Launch Template
+## EC2 Launch Template
 
-The Launch Template defines how EC2 instances should be created.
+The Launch Template defines the configuration used by the Auto Scaling Group when launching EC2 instances.
 
-It includes:
+The current configuration includes:
 
 * Amazon Linux 2023
-* `t3.micro` instance type
-* IAM instance profile
+* `t3.micro`
 * Security Group
+* IAM instance profile
 * User data
-* Encrypted EBS storage
-* Detailed monitoring
-* Resource tagging
+* Encrypted GP3 EBS volume
+* EC2 monitoring
+* Resource tags
 
-The Launch Template acts as the blueprint used by the Auto Scaling Group.
+## Dynamic Amazon Linux AMI
 
----
+The project does not hardcode an AMI ID.
 
-# 6. Dynamic Amazon Linux AMI
-
-Instead of hardcoding an AMI ID, Terraform dynamically retrieves the latest Amazon Linux 2023 AMI.
-
-Example:
+Terraform searches for the latest matching Amazon Linux 2023 image:
 
 ```hcl
 data "aws_ami" "amazon_linux" {
@@ -234,19 +180,23 @@ data "aws_ami" "amazon_linux" {
 }
 ```
 
-This prevents the infrastructure from depending on an outdated AMI ID.
+The selected AMI is then passed to the Launch Template.
 
----
+This allows the infrastructure to use the latest matching image without manually updating an AMI ID.
 
-# 7. User Data
+## User Data
 
-EC2 instances are automatically configured at launch using a user-data script.
+EC2 instances are configured automatically when they launch.
 
-The script installs and starts the web server and generates a simple test page containing instance information.
+The user data script:
 
-The page is useful for demonstrating that requests are being distributed across multiple EC2 instances.
+* Installs Apache
+* Starts the web server
+* Enables the web server
+* Retrieves instance metadata
+* Creates a test webpage
 
-Example information displayed:
+The test page displays information including:
 
 ```text
 Instance ID
@@ -255,104 +205,67 @@ Availability Zone
 Private IP
 ```
 
-This makes the load-balancing behavior easy to verify.
+This makes it possible to verify that the ALB is distributing requests between different EC2 instances.
 
----
+## Auto Scaling Group
 
-# 8. Auto Scaling Group
-
-The Auto Scaling Group manages the EC2 fleet.
+The Auto Scaling Group manages the EC2 instances.
 
 Current configuration:
 
 ```text
-Minimum: 2
-Desired: 2
-Maximum: 4
+Minimum:          2
+Desired capacity: 2
+Maximum:          4
 ```
 
-This provides baseline redundancy while allowing the infrastructure to scale when required.
+The ASG uses the Launch Template to create instances and registers them with the ALB target group.
 
-The ASG:
+ELB health checks are used to help ensure that unhealthy instances are replaced.
 
-* Uses the Launch Template
-* Spans multiple Availability Zones
-* Registers instances with the ALB Target Group
-* Uses ELB health checks
-* Replaces unhealthy instances
-* Supports automatic scaling
+## Auto Scaling
 
----
-
-# 9. Auto Scaling Policies
-
-CloudWatch monitors EC2 CPU utilization.
+CloudWatch monitors CPU utilization.
 
 ### Scale Out
 
-When CPU utilization exceeds:
-
-```text
-70%
-```
-
-the scale-out policy increases the number of instances.
+When CPU utilization exceeds 70%:
 
 ```text
 CPU > 70%
-     |
-     v
+    |
+    v
 CloudWatch Alarm
-     |
-     v
-Scale Out
-     |
-     v
-ASG +1 Instance
+    |
+    v
+Scale Out Policy
+    |
+    v
+Additional EC2 Instance
 ```
 
 ### Scale In
 
-When CPU utilization falls below:
-
-```text
-30%
-```
-
-the scale-in policy reduces the number of instances.
+When CPU utilization falls below 30%:
 
 ```text
 CPU < 30%
-     |
-     v
+    |
+    v
 CloudWatch Alarm
-     |
-     v
-Scale In
-     |
-     v
-ASG -1 Instance
+    |
+    v
+Scale In Policy
+    |
+    v
+EC2 Instance Removed
 ```
 
-Cooldown periods are used to prevent rapid repeated scaling actions.
+The Auto Scaling Group maintains the configured minimum and maximum instance counts.
 
----
+## Security
 
-# 10. IAM
-
-The project uses IAM to control EC2 permissions.
-
-The EC2 instances receive permissions through an IAM instance profile rather than embedding AWS credentials inside the server.
-
-This follows AWS security best practices.
-
-The project also uses the AWS Auto Scaling service-linked role for Auto Scaling service operations.
-
----
-
-# 11. Security Groups
-
-Security Groups provide network-level access control.
+Security Groups control traffic between the load balancer and EC2 instances.
 
 The intended traffic flow is:
 
@@ -371,36 +284,26 @@ EC2 Security Group
 EC2
 ```
 
-The EC2 instances should not need to accept arbitrary HTTP traffic directly from the internet.
+EC2 instances use an IAM instance profile rather than storing AWS credentials on the servers.
 
-Instead, application traffic should flow through the Load Balancer.
-
----
-
-# Terraform Structure
-
-The project uses a modular Terraform structure:
+## Terraform Structure
 
 ```text
 terraform/
-│
 ├── main.tf
 ├── variables.tf
 ├── outputs.tf
 ├── providers.tf
 ├── data.tf
-│
 ├── networking.tf
 ├── security.tf
 ├── iam.tf
 ├── launch_template.tf
 ├── alb.tf
 ├── autoscaling.tf
-│
 ├── terraform.tfvars
 │
 ├── modules/
-│   │
 │   ├── networking/
 │   │   ├── main.tf
 │   │   ├── variables.tf
@@ -435,238 +338,188 @@ terraform/
     └── install.sh
 ```
 
----
+## Terraform Modules
 
-# Terraform Workflow
+The infrastructure is separated into Terraform modules:
 
-The infrastructure follows a standard Terraform workflow.
+| Module          | Responsibility                                     |
+| --------------- | -------------------------------------------------- |
+| Networking      | VPC, subnets, route tables and Internet Gateway    |
+| Security        | Security Groups                                    |
+| IAM             | IAM roles and instance profiles                    |
+| Launch Template | EC2 instance configuration                         |
+| ALB             | Load balancer, target group and listener           |
+| Auto Scaling    | Auto Scaling Group, policies and CloudWatch alarms |
 
-## Initialize
+## Terraform Workflow
+
+Initialize Terraform:
 
 ```bash
 terraform init
 ```
 
-## Format
+Format the configuration:
 
 ```bash
 terraform fmt -recursive
 ```
 
-## Validate
+Validate the configuration:
 
 ```bash
 terraform validate
 ```
 
-## Generate a Plan
+Create an execution plan:
 
 ```bash
 terraform plan
 ```
 
-For controlled deployments, the plan can be saved:
+Save a plan for deployment:
 
 ```bash
 terraform plan -out=tfplan
 ```
 
-## Apply
+Apply the saved plan:
 
 ```bash
 terraform apply tfplan
 ```
 
-## Destroy
-
-When the environment is no longer required:
+Destroy the infrastructure:
 
 ```bash
 terraform destroy
 ```
 
----
+## Deployment
 
-# Deployment Process
+The infrastructure is created through Terraform rather than manually configuring individual AWS resources.
 
-The infrastructure is deployed in dependency order by Terraform.
+Terraform builds the dependency relationship between the components.
 
-Terraform determines the dependency graph automatically.
-
-For example:
+The main dependency flow is:
 
 ```text
 VPC
  |
- +--> Subnets
+ +-- Subnets
  |
- +--> Internet Gateway
+ +-- Internet Gateway
  |
- +--> Route Tables
+ +-- Route Tables
  |
- +--> Security Groups
+ +-- Security Groups
  |
- +--> ALB
+ +-- IAM
+ |
+ +-- Launch Template
+ |
+ +-- Application Load Balancer
  |      |
- |      +--> Target Group
+ |      +-- Target Group
  |      |
- |      +--> Listener
+ |      +-- Listener
  |
- +--> Launch Template
- |
- +--> Auto Scaling Group
+ +-- Auto Scaling Group
         |
-        +--> EC2 Instances
+        +-- EC2 Instances
 ```
 
----
+## Testing
 
-# Validation and Testing
-
-After deployment, the infrastructure can be tested through the ALB DNS endpoint.
-
-Example:
+After deployment, the ALB DNS name can be used to test the application:
 
 ```bash
 curl http://<ALB-DNS-NAME>
 ```
 
-Repeated requests can be used to verify that traffic is being distributed across instances.
+The response should contain information about the EC2 instance serving the request.
 
-The response should contain instance-specific information such as:
+Repeated requests can be used to verify that traffic is being distributed across the instances.
 
-```text
-Instance ID
-Hostname
-Availability Zone
-Private IP
-```
-
-This allows the load-balancing behavior to be observed.
-
----
-
-# High Availability
-
-The infrastructure uses multiple Availability Zones.
-
-Instead of relying on a single EC2 instance:
+Example:
 
 ```text
-        EC2
-         |
-       Failure
-         |
-      OUTAGE
+Instance ID: i-xxxxxxxx
+Hostname: ip-10-0-x-x
+Availability Zone: us-east-1a
+Private IP: 10.0.x.x
 ```
 
-the architecture uses:
+A second instance should return different instance information when traffic is distributed to it.
+
+## High Availability
+
+The application runs across multiple Availability Zones.
 
 ```text
-          ALB
-           |
-      +----+----+
-      |         |
-     EC2       EC2
-     AZ-A      AZ-B
+                    ALB
+                  /     \
+                 /       \
+          us-east-1a    us-east-1b
+              |              |
+           EC2 #1          EC2 #2
 ```
 
-If an individual instance becomes unhealthy, the ALB can stop sending traffic to it and the Auto Scaling Group can replace it.
+The design avoids relying on a single EC2 instance.
 
----
+If an instance becomes unhealthy, the ALB can stop sending traffic to it and the Auto Scaling Group can replace it.
 
-# Scalability
+## Scalability
 
-The infrastructure is designed to scale horizontally.
-
-Initial state:
+The Auto Scaling Group allows the number of EC2 instances to change based on demand.
 
 ```text
-2 EC2 instances
+Normal load
+    |
+    v
+2 instances
+    |
+    | CPU increases
+    v
+3 instances
+    |
+    | CPU increases
+    v
+4 instances
 ```
 
-Under increased CPU utilization:
+When demand decreases, instances can be removed while respecting the configured minimum capacity.
 
-```text
-2 → 3 → 4
-```
+## Infrastructure as Code
 
-When demand decreases:
-
-```text
-4 → 3 → 2
-```
-
-The infrastructure therefore avoids relying on vertical scaling of a single server.
-
----
-
-# Infrastructure as Code Benefits
-
-Using Terraform provides several advantages over manual AWS configuration:
+Terraform provides:
 
 * Repeatable deployments
 * Version-controlled infrastructure
-* Consistent environments
-* Automated dependency management
-* Easier disaster recovery
-* Code review capability
-* Reduced configuration drift
 * Reusable modules
+* Consistent configuration
+* Automated dependency management
+* Easier infrastructure changes
+* Reduced manual configuration
+* Infrastructure review through Git
 
-The infrastructure configuration can be reviewed alongside application code in Git.
+## Technologies
 
----
+| Technology                    | Purpose                |
+| ----------------------------- | ---------------------- |
+| AWS VPC                       | Network infrastructure |
+| AWS EC2                       | Compute                |
+| AWS Launch Template           | EC2 configuration      |
+| AWS Application Load Balancer | Traffic distribution   |
+| AWS Target Groups             | Instance registration  |
+| AWS Auto Scaling              | Automatic scaling      |
+| AWS CloudWatch                | Monitoring and scaling |
+| AWS IAM                       | Access control         |
+| Amazon Linux 2023             | EC2 operating system   |
+| Terraform                     | Infrastructure as Code |
+| Git                           | Version control        |
 
-# Technologies Used
-
-| Technology                    | Purpose                         |
-| ----------------------------- | ------------------------------- |
-| AWS VPC                       | Network isolation               |
-| AWS EC2                       | Compute                         |
-| AWS Launch Template           | EC2 configuration               |
-| AWS Application Load Balancer | Traffic distribution            |
-| AWS Target Groups             | Backend registration            |
-| AWS Auto Scaling              | Horizontal scaling              |
-| AWS CloudWatch                | Monitoring and scaling triggers |
-| AWS IAM                       | Access control                  |
-| Terraform                     | Infrastructure as Code          |
-| Amazon Linux 2023             | Operating system                |
-| Git/GitHub                    | Version control                 |
-
----
-
-# Engineering Decisions
-
-### Dynamic AMI discovery
-
-Rather than hardcoding an AMI ID, Terraform retrieves the latest matching Amazon Linux 2023 AMI.
-
-### Multi-AZ deployment
-
-The infrastructure spans multiple Availability Zones to improve availability.
-
-### Modular Terraform
-
-Terraform modules separate networking, security, IAM, load balancing, launch configuration, and scaling responsibilities.
-
-### Load balancer health checks
-
-Traffic is sent to healthy instances rather than simply checking whether an EC2 instance is running.
-
-### Automated instance configuration
-
-User data removes the need for manual server configuration after launch.
-
-### Infrastructure version control
-
-The complete infrastructure is represented as code and stored in Git.
-
----
-
-# Project Status
-
-Current implementation includes:
+## Project Status
 
 * [x] Terraform project structure
 * [x] AWS provider configuration
@@ -686,109 +539,43 @@ Current implementation includes:
 * [x] Auto Scaling Group configuration
 * [x] CloudWatch scaling alarms
 * [x] Auto Scaling policies
-* [ ] Resolve AWS Auto Scaling service-linked-role deployment issue
-* [ ] Deploy EC2 instances successfully
+* [ ] Complete EC2 instance deployment
 * [ ] Validate ALB traffic distribution
 * [ ] Test automatic scale-out
 * [ ] Test automatic scale-in
-* [ ] Add final deployment screenshots
-* [ ] Document operational testing
 
----
+## Future Improvements
 
-# Lessons Demonstrated
+* Move EC2 instances into private subnets
+* Add NAT Gateway
+* Add HTTPS using AWS Certificate Manager
+* Add Route 53 DNS
+* Add AWS WAF
+* Add SSM Session Manager
+* Add remote Terraform state using S3
+* Add Terraform state locking
+* Add CI/CD pipeline
+* Add separate development and production environments
+* Add CloudWatch dashboards
+* Add centralized logging
+* Add automated Terraform testing
 
-This project demonstrates practical experience with:
+## Project Goals
 
-1. Designing AWS infrastructure
-2. Building infrastructure using Terraform
-3. Working with Terraform modules
-4. Managing resource dependencies
-5. Dynamic AWS resource discovery
-6. Designing highly available infrastructure
-7. Implementing load balancing
-8. Implementing horizontal scaling
-9. Using IAM securely
-10. Monitoring infrastructure with CloudWatch
-11. Debugging Terraform/AWS deployment failures
-12. Using Git for infrastructure version control
+The main goals of this project are to demonstrate practical experience with:
 
----
-
-# Future Improvements
-
-Potential production improvements include:
-
-* Private subnets for EC2 instances
-* NAT Gateway architecture
-* HTTPS using ACM certificates
-* Route 53 DNS
-* AWS WAF
-* SSM Session Manager
-* Remote Terraform state using S3
-* DynamoDB state locking
-* CI/CD pipeline for Terraform
-* Separate development/staging/production environments
-* Terraform testing
-* CloudWatch dashboards
-* Centralized logging
-* More advanced target-tracking scaling policies
-
----
-
-# Disclaimer
-
-This project is designed as a cloud engineering portfolio project and learning environment.
-
-Before using a similar architecture in production, additional security, networking, monitoring, cost-control, compliance, and operational requirements should be evaluated.
-
-````
-
-## One important change I'd make to the README
-
-Because we **haven't successfully completed the ASG deployment yet**, I deliberately marked it:
-
-```text
-[ ] Resolve AWS Auto Scaling service-linked-role deployment issue
-````
-
-rather than pretending the entire system is operational.
-
-That's actually valuable from a recruiter perspective. Once we fix the IAM/service-linked-role issue and verify the instances and ALB, we'll change those items to `[x]` and add real screenshots/results.
-
-### For the diagram
-
-I recommend we create a **custom architecture diagram specifically for your implementation**, rather than using a generic AWS diagram. It should show:
-
-```text
-                    INTERNET
-                       |
-                       v
-              ┌─────────────────┐
-              │ Application     │
-              │ Load Balancer   │
-              └────────┬────────┘
-                       |
-                 Target Group
-                       |
-          ┌────────────┴────────────┐
-          │                         │
-     Public Subnet A           Public Subnet B
-       us-east-1a                us-east-1b
-          │                         │
-       EC2 #1                    EC2 #2
-          │                         │
-          └────────────┬────────────┘
-                       │
-                Auto Scaling Group
-                  min 2 / max 4
-                       │
-              CloudWatch Alarms
-                 ↙           ↘
-            CPU > 70%     CPU < 30%
-              Scale Out     Scale In
-```
-
-And around those components we'll show the **VPC, Internet Gateway, Security Groups, IAM, Launch Template, and Terraform** relationships.
-
-If you want, I can generate that **actual architecture diagram as an image** now, ready to put into your repository.
+* AWS infrastructure design
+* Terraform
+* Infrastructure as Code
+* EC2
+* Launch Templates
+* Application Load Balancers
+* Auto Scaling
+* CloudWatch
+* IAM
+* Security Groups
+* Multi-AZ architecture
+* Terraform modules
+* Automated server configuration
+* Troubleshooting AWS infrastructure
+* Git-based infrastructure management
