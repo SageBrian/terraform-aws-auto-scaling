@@ -11,6 +11,6 @@ module "alb" {
   public_subnet_2_id = module.networking.public_subnet_2_id
 
   alb_security_group_id = module.security.alb_security_group_id
-  
+
 
 }
