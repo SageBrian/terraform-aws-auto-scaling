@@ -10,7 +10,12 @@ The infrastructure is managed entirely through Terraform.
 
 ## Architecture
 
-```text
+
+![Image Alt Text](diagram.png)
+
+
+```
+text
                          Internet
                             |
                             v
