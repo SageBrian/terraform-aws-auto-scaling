@@ -11,47 +11,12 @@ The infrastructure is managed entirely through Terraform.
 ## Architecture
 
 
-![Image Alt Text](diagram.png)
+
+![Image Alt Text](architecture.png)
 
 
-```
-text
-                         Internet
-                            |
-                            v
-                +-----------------------+
-                | Application Load      |
-                | Balancer              |
-                +-----------+-----------+
-                            |
-                       HTTP :80
-                            |
-                 +----------+----------+
-                 |                     |
-                 v                     v
-        +----------------+    +----------------+
-        | Public Subnet  |    | Public Subnet  |
-        | us-east-1a     |    | us-east-1b     |
-        |                |    |                |
-        | EC2 Instance   |    | EC2 Instance   |
-        +--------+-------+    +--------+-------+
-                 |                     |
-                 +----------+----------+
-                            |
-                  Auto Scaling Group
-                     Min: 2
-                     Desired: 2
-                     Max: 4
-                            |
-                     +------+------+
-                     |             |
-                  Scale Out     Scale In
-                  CPU > 70%     CPU < 30%
-                     |             |
-                     +------+------+
-                            |
-                       CloudWatch
-```
+
+
 
 ## AWS Resources
 
