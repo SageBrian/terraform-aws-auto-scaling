@@ -260,7 +260,6 @@ EC2 instances use an IAM instance profile rather than storing AWS credentials on
 
 ```text
 terraform/
-├── main.tf
 ├── variables.tf
 ├── outputs.tf
 ├── providers.tf
